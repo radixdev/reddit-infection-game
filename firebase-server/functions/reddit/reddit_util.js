@@ -15,6 +15,9 @@ const reddit = new snoowrap({
 exports.getAllMentionParcels = async function() {
   let mentionParcels = [];
   let mentions = await getAllMentions();
+  if (mentions.length === 0) {
+    return [];
+  }
   for (let i = 0; i< mentions.length; i++) {
     let mention = mentions[i];
     mentionParcels.push({
@@ -25,12 +28,20 @@ exports.getAllMentionParcels = async function() {
       context: mention.context
     });
   }
+
+  // Mark all the mentions as read
+  await reddit.markMessagesAsRead(mentions);
   return mentionParcels;
 }
 
 async function getAllMentions() {
-  return reddit.getUnreadMessages({ filter: "mentions" });
+  // The following doesn't work since they aren't
+  // actual inbox messages and can't be marked-as-read/deleted
   // return reddit.getInbox({ filter: "mentions" });
+
+  // Check if it's a mention based on the fields present
+  return (await reddit.getUnreadMessages())
+    .filter(p => p.was_comment === true && p.type === "username_mention");
 }
 
 async function getAllRepliersToMention(mention) {
