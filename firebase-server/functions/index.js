@@ -14,9 +14,11 @@ firestore.settings(settings);
 
 const reddit_util = require('./reddit/reddit_util.js');
 
-exports.helloWorld = functions.https.onRequest((request, response) => {
+exports.helloWorld = functions.https.onRequest(async (request, response) => {
   try {
-    reddit_util.test();
+    // await reddit_util.test();
+    let mentionParcels = await reddit_util.getAllMentionParcels();
+    console.log(mentionParcels);
     response.send("all good");
     return;
   } catch (err) {
