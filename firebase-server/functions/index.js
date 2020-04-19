@@ -2,23 +2,28 @@
 
 const functions = require('firebase-functions');
 var admin = require("firebase-admin");
-var serviceAccount = require("./service-account.json");
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(require("./service-account.json")),
   databaseURL: "https://reddit-infection-game.firebaseio.com"
 });
 
 const firestore = admin.firestore();
-const settings = { timestampsInSnapshots: true };
-firestore.settings(settings);
+firestore.settings({ timestampsInSnapshots: true });
 
 const reddit_util = require('./reddit/reddit_util.js');
+const job_enqueuer = require('./tasker/job_enqueuer.js');
 
 exports.helloWorld = functions.https.onRequest(async (request, response) => {
   try {
     // await reddit_util.test();
+    // let mentionParcels = await reddit_util.getAllMentionParcels();
+    // console.log(mentionParcels);
+
     let mentionParcels = await reddit_util.getAllMentionParcels();
     console.log(mentionParcels);
+
+    // Add each parcel to the pending queue in firestore
+    let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
     response.send("all good");
     return;
   } catch (err) {
@@ -26,4 +31,19 @@ exports.helloWorld = functions.https.onRequest(async (request, response) => {
     console.log(err);
     return "fuck";
   }
+});
+
+exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 60 minutes').onRun(async (context) => {
+  try {
+    let mentionParcels = await reddit_util.getAllMentionParcels();
+    console.log(mentionParcels);
+
+    // Add each parcel to the pending queue in firestore
+    let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
+    console.log(enqueueResponses);
+    console.log("Enqueued mentions!");
+  } catch (err) {
+    console.error(err);
+  }
+  return null;
 });
