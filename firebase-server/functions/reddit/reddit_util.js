@@ -1,3 +1,6 @@
+// ANY redditor username that leaves this module should be escaped!!!
+// Repliers, authors, etc. ALL should be safe before exit!
+
 const functions = require('firebase-functions');
 const snoowrap = require('snoowrap');
 
@@ -23,7 +26,7 @@ exports.getAllMentionParcels = async function() {
     mentionParcels.push({
       mention_id: mention.id,
       posted_at_utc: mention.created_utc,
-      author: mention.author.name,
+      author: getFirestoreSafeRedditorName(mention.author.name),
       subreddit: mention.subreddit.display_name,
       context: mention.context
     });

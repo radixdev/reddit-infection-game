@@ -28,9 +28,9 @@ exports.helloWorld = functions.https.onRequest(async (request, response) => {
     // let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
 
     let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
-    dequeuedJobDocuments.forEach(doc => {
-      console.log(doc.data());
-    });
+    // dequeuedJobDocuments.forEach(doc => {
+    //   console.log(doc.data());
+    // });
     await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
     response.send("all good");
     return;
