@@ -11,7 +11,8 @@ exports.enqueueMentionsToPendingList = async function (admin, firestore, mention
   for (let i = 0; i < mentionParcels.length; i++) {
     let mention = mentionParcels[i];
     for (let j = 0; j < QUEUE_EXPIRATION_OFFSETS.length; j++) {
-      pendingDocumentPromises.push(pendingCollection.add(createPendingDocument(admin, mention, QUEUE_EXPIRATION_OFFSETS[j])));
+      let pendingDoc = createPendingDocument(admin, mention, QUEUE_EXPIRATION_OFFSETS[j]);
+      pendingDocumentPromises.push(pendingCollection.add(pendingDoc));
     }
   }
 
@@ -24,6 +25,7 @@ function createPendingDocument(admin, mention, postedTimeDeltaSeconds) {
     posted_at_utc: mention.posted_at_utc,
     author: mention.author,
     context: mention.context,
+    subreddit: mention.subreddit,
 
     // Fields for Firestore itself
     processed_at: admin.firestore.FieldValue.serverTimestamp(),

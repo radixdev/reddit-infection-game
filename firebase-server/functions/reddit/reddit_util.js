@@ -24,7 +24,7 @@ exports.getAllMentionParcels = async function() {
       mention_id: mention.id,
       posted_at_utc: mention.created_utc,
       author: mention.author.name,
-      // Can drop this field at a later date?
+      subreddit: mention.subreddit.display_name,
       context: mention.context
     });
   }
@@ -33,6 +33,22 @@ exports.getAllMentionParcels = async function() {
   await reddit.markMessagesAsRead(mentions);
   return mentionParcels;
 }
+
+exports.getAllRepliersToMention = async function(mentionId) {
+  // Get the comment itself
+  let comment = await reddit.getComment(mentionId);
+  // https://not-an-aardvark.github.io/snoowrap/Comment.html#expandReplies__anchor
+  // The depth is explicitly checked since the Reddit API apparently
+  // can return deeper comments than we want
+  return comment.expandReplies({ depth: 1 }).replies
+    .filter(post => post.depth === 1)
+    .map(post => getFirestoreSafeRedditorName(post.author.name));
+}
+
+// exports.getSubredditForCommentId = async function(mentionId) {
+//   let comment = await reddit.getComment(mentionId);
+//   return comment.subreddit.display_name;
+// }
 
 async function getAllMentions() {
   // The following doesn't work since they aren't
@@ -44,33 +60,21 @@ async function getAllMentions() {
     .filter(p => p.was_comment === true && p.type === "username_mention");
 }
 
-async function getAllRepliersToMention(mention) {
-  // Get the comment itself
-  let comment = await reddit.getComment(mention.id);
-  // https://not-an-aardvark.github.io/snoowrap/Comment.html#expandReplies__anchor
-  // The depth is explicitly checked since the Reddit API apparently
-  // can return deeper comments than we want
-  return comment.expandReplies({depth: 1}).replies
-    .filter(post => post.depth === 1)
-    .map(post => getFirestoreSafeRedditorName(post.author.name));
-}
-
 // Just the name in quotes
 function getFirestoreSafeRedditorName(name) {
   return `'${name}'`;
 }
 
-// Printing a list of the titles on the front page
-exports.test = async function () {
-  // reddit.getHot().map(post => post.title)
-  return getAllMentions()
-    .then(result => {
-      console.log(result);
-      return getAllRepliersToMention(result[0]);
-    }).then(result => {
-      console.log(result);
-      return Promise.resolve();
-    }).catch(err => {
-      console.error(new Error('Failed to complete createUser flow', err));
-    });
-}
+// exports.test = async function () {
+//   // reddit.getHot().map(post => post.title)
+//   return getAllMentions()
+//     .then(result => {
+//       console.log(result);
+//       return getAllRepliersToMention(result[0]);
+//     }).then(result => {
+//       console.log(result);
+//       return Promise.resolve();
+//     }).catch(err => {
+//       console.error(new Error('Failed to complete createUser flow', err));
+//     });
+// }

@@ -13,6 +13,7 @@ firestore.settings({ timestampsInSnapshots: true });
 const reddit_util = require('./reddit/reddit_util.js');
 const job_enqueuer = require('./tasker/job_enqueuer.js');
 const job_dequeuer = require('./tasker/job_dequeuer.js');
+const infection_handler = require('./infection/infection_handler.js');
 
 exports.helloWorld = functions.https.onRequest(async (request, response) => {
   try {
@@ -29,7 +30,8 @@ exports.helloWorld = functions.https.onRequest(async (request, response) => {
     let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
     dequeuedJobDocuments.forEach(doc => {
       console.log(doc.data());
-    })
+    });
+    await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
     response.send("all good");
     return;
   } catch (err) {
@@ -56,13 +58,8 @@ exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 5 minutes').
 
 exports.scheduledMentionDequeuer = functions.pubsub.schedule('every 20 minutes').onRun(async (context) => {
   try {
-    // let mentionParcels = await reddit_util.getAllMentionParcels();
-    // console.log(mentionParcels);
-
-    // // Add each parcel to the pending queue in firestore
-    // let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
-    // console.log(enqueueResponses);
-    // console.log("Enqueued mentions!");
+    let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
+    await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
   } catch (err) {
     console.error(err);
   }
