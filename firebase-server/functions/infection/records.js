@@ -8,8 +8,8 @@ exports.createInfectionRecords = async function (admin, firestore, mondayUsernam
       infected_by: data.author,
       newly_infected: mondayUsername,
       infected_in_subreddit: data.subreddit,
-      infection_context: data.context,
-      infected_at_utc: data.posted_at_utc,
+      infection_context: `https://reddit.com${data.context}`,
+      infected_at_date: new Date(data.posted_at_utc * 1000),
 
       fs_created_at: admin.firestore.FieldValue.serverTimestamp(),
     });

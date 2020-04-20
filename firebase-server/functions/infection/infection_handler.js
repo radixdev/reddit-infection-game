@@ -34,7 +34,7 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
 }
 
 async function handleMentionDoc(admin, firestore, data) {
-  console.log(`Handling mention doc for data ${data}`);
+  console.log(`Handling mention doc for data ${data.context}`);
   // Get all the replices to even see if we have to do anything
   const allRepliersToMention = await reddit_util.getAllRepliersToMention(data.mention_id);
 
