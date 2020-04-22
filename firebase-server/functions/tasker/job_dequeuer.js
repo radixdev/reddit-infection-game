@@ -4,6 +4,7 @@ exports.dequeueExpiredMentionsFromPending = async function (admin, firestore) {
 
   let expiredDocumentsSnapshot = await pendingCollection
     .where('queue_expiration_at_utc', '<=', nowUtcSeconds)
+    .orderBy('queue_expiration_at_utc')
     .limit(25)
     .get();
 

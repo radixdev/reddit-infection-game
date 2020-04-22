@@ -33,29 +33,23 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
   return Promise.resolve();
 }
 
-async function handleMentionDoc(admin, firestore, data) {
-  console.log(`Handling mention doc for data ${data.context}`);
+async function handleMentionDoc(admin, firestore, mentionData) {
+  console.log(`Handling mention doc for data ${mentionData.context}`);
   // Get all the replices to even see if we have to do anything
-  const allRepliersToMention = await reddit_util.getAllRepliersToMention(data.mention_id);
+  const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id);
 
   if (allRepliersToMention.length === 0) {
     // Nothing to do!
-    console.log(`mention ${data.context} had no replies :(`);
+    console.log(`mention ${mentionData.context} had no replies :(`);
     return Promise.resolve();
   }
-
-  // const zombieUsername = data.author;
-  // const infectionSubreddit = data.subreddit;
-  // const infectionContext = data.context;
-  // // Not precisely when they got infected, but close enough lol
-  // const infectedAtUtc = data.posted_at_utc;
 
   // Check if author is infected, if not back out
   // TODO
 
   // INFECTION RECORD COLLECTION
     // * CREATE document describing the when/where/who of the infection for each individual infection
-  await infection_recorder.createInfectionRecords(admin, firestore, allRepliersToMention, data);
+  await infection_recorder.createInfectionRecords(admin, firestore, allRepliersToMention, mentionData);
 
   // INFECTED COLLECTION
     // * CREATE infection document for each replier, stating when/where/who infected them

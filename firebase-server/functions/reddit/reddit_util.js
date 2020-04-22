@@ -48,11 +48,6 @@ exports.getAllRepliersToMention = async function(mentionId) {
     .map(post => getFirestoreSafeRedditorName(post.author.name));
 }
 
-// exports.getSubredditForCommentId = async function(mentionId) {
-//   let comment = await reddit.getComment(mentionId);
-//   return comment.subreddit.display_name;
-// }
-
 async function getAllMentions() {
   // The following doesn't work since they aren't
   // actual inbox messages and can't be marked-as-read/deleted
@@ -67,17 +62,3 @@ async function getAllMentions() {
 function getFirestoreSafeRedditorName(name) {
   return `'${name}'`;
 }
-
-// exports.test = async function () {
-//   // reddit.getHot().map(post => post.title)
-//   return getAllMentions()
-//     .then(result => {
-//       console.log(result);
-//       return getAllRepliersToMention(result[0]);
-//     }).then(result => {
-//       console.log(result);
-//       return Promise.resolve();
-//     }).catch(err => {
-//       console.error(new Error('Failed to complete createUser flow', err));
-//     });
-// }

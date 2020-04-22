@@ -19,9 +19,11 @@ exports.enqueueMentionsToPendingList = async function (admin, firestore, mention
   return await Promise.all(pendingDocumentPromises);
 }
 
+// Returns mentionData
 function createPendingDocument(admin, mention, postedTimeDeltaSeconds) {
   return {
     mention_id: mention.mention_id,
+    // Not precisely when they got infected, but close enough lol
     posted_at_utc: mention.posted_at_utc,
     author: mention.author,
     context: mention.context,
