@@ -41,6 +41,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   console.log(`Handling mention doc for data ${mentionData.context}`);
   // Get all the replices to even see if we have to do anything
   const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
+  console.log(`allRepliersToMention: ${allRepliersToMention}`);
 
   if (allRepliersToMention.length === 0) {
     // Nothing to do!
@@ -52,11 +53,16 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   let aliceDoc = stubbs_manager.getDocumentForRedditor(aliceName);
   if (!aliceDoc.exists) {
     console.log(`Author with name ${aliceName} is not infected!`);
-    return;
+    return Promise.resolve();
   }
 
   // Need to sanitize the list of repliers of people already infected
   sanitizedRepliersList = await stubbs_manager.filterListOfAlreadyInfected(admin, firestore, allRepliersToMention);
+  console.log(`sanitizedRepliersList: ${sanitizedRepliersList}`);
+  if (sanitizedRepliersList.length === 0) {
+    console.log(`All repliers were already infected. Returning.`);
+    return Promise.resolve();
+  }
 
   // INFECTION RECORD COLLECTION
     // * CREATE document describing the when/where/who of the infection for each individual infection
@@ -68,5 +74,19 @@ async function handleMentionDoc(admin, firestore, mentionData) {
         // https://cloud.google.com/firestore/docs/manage-data/add-data#update_elements_in_an_array
     // * Iterate up infector parents with the number of newly infected
 
+  // Create the infection doc for each replier
+  const aliceDepth = aliceDoc.tree_depth || 0;
+  let stubbCreationPromises = [];
+  sanitizedRepliersList.forEach(replier => {
+    stubbCreationPromises.push(stubbs_manager.createNewStubb(admin, firestore, mentionData, replier, aliceDepth));
+  });
+  await Promise.all(stubbCreationPromises);
 
+  // Update alice doc
+  await stubbs_manager.updateAliceDocWithNovelInfections(admin, firestore, aliceName, sanitizedRepliersList);
+
+  // TODO
+  // Update infector parents up the chain!
+
+  return Promise.resolve();
 }
