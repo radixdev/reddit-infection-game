@@ -11,13 +11,13 @@ exports.createInfectionRecords = async function (admin, firestore, mondayUsernam
       inf_context: `https://reddit.com${data.context}`,
       inf_at: new Date(data.posted_at_utc * 1000),
 
-      fs_created_at: firestore.FieldValue.serverTimestamp(),
+      fs_created_at: admin.firestore.FieldValue.serverTimestamp(),
     });
     pendingDocumentPromises.push(recordDoc);
   }
 
   let totalInfectedRef = firestore.collection('stats').doc("total_infected");
-  const incrementBy = firestore.FieldValue.increment(mondayUsernames.length);
+  const incrementBy = admin.firestore.FieldValue.increment(mondayUsernames.length);
   pendingDocumentPromises.push(totalInfectedRef.update({ "total_infected": incrementBy }));
 
   return await Promise.all(pendingDocumentPromises);

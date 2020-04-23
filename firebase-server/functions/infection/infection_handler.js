@@ -34,6 +34,24 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
   return Promise.resolve();
 }
 
+exports.createGenesisInfection = async function (admin, firestore, unsafeRedditorName) {
+  // Create a new user with no parents and a special "is genesis" key
+  const parentTreeDepth = -1;
+  const safeRedditorName = reddit_util.getFirestoreSafeRedditorName(unsafeRedditorName);
+
+  const mentionData = {
+    mention_id: "fo9cwo0",
+    // Not precisely when they got infected, but close enough lol
+    posted_at_utc: new Date() / 1000,
+    // No author since this is a genesis user
+    // author: safeRedditorName,
+    context: "https://www.reddit.com/r/RedditInfectionGame/comments/g6g9e6/genesis/fo9cwo0",
+    subreddit: "RedditInfectionGame"
+  };
+
+  return await stubbs_manager.createNewStubb(admin, firestore, mentionData, safeRedditorName, parentTreeDepth, true);
+}
+
 async function handleMentionDoc(admin, firestore, mentionData) {
   // ALICE the author has bitten BOB
   const aliceName = mentionData.author;
@@ -50,7 +68,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   }
 
   // Check if author is infected, if not back out
-  let aliceDoc = stubbs_manager.getDocumentForRedditor(aliceName);
+  let aliceDoc = stubbs_manager.getDocumentForRedditor(admin, firestore, aliceName);
   if (!aliceDoc.exists) {
     console.log(`Author with name ${aliceName} is not infected!`);
     return Promise.resolve();
@@ -78,7 +96,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   const aliceDepth = aliceDoc.tree_depth || 0;
   let stubbCreationPromises = [];
   sanitizedRepliersList.forEach(replier => {
-    stubbCreationPromises.push(stubbs_manager.createNewStubb(admin, firestore, mentionData, replier, aliceDepth));
+    stubbCreationPromises.push(stubbs_manager.createNewStubb(admin, firestore, mentionData, replier, aliceDepth, false));
   });
   await Promise.all(stubbCreationPromises);
 

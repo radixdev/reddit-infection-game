@@ -41,6 +41,17 @@ exports.helloWorld = functions.https.onRequest(async (request, response) => {
   }
 });
 
+exports.createGenesisUser = functions.https.onRequest(async (request, response) => {
+  try {
+    await infection_handler.createGenesisInfection(admin, firestore, "call_me_miguel");
+    return response.send("created gensis user... me!");
+  } catch (err) {
+    console.log(`Last stage caught error ${err}`);
+    console.log(err);
+    return "fuck";
+  }
+});
+
 exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
   try {
     let mentionParcels = await reddit_util.getAllMentionParcels();

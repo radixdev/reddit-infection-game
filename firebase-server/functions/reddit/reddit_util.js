@@ -61,6 +61,6 @@ async function getAllMentions() {
 }
 
 // Just the name in quotes
-function getFirestoreSafeRedditorName(name) {
+exports.getFirestoreSafeRedditorName = function(name) {
   return `'${name}'`;
 }

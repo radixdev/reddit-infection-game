@@ -1,16 +1,12 @@
 const reddit_util = require('../reddit/reddit_util.js');
 
-exports.createGenesisStubb = async function(admin, firestore, unsafeRedditorUsername) {
-  // Create a new user with no parents and a special "is genesis" key
-}
-
-exports.createNewStubb = async function (admin, firestore, mentionData, safeRedditorName, parentTreeDepth) {
+exports.createNewStubb = async function (admin, firestore, mentionData, safeRedditorName, parentTreeDepth, isGenesis) {
   console.log(`Creating stubb doc for ${safeRedditorName} with parent tree depth ${parentTreeDepth}`);
   let batch = firestore.batch();
 
   // Create a new user with links to the mentioner
   let stubbsCreateRef = firestore.collection('stubbs').doc(safeRedditorName);
-  batch.set(stubbsRef, {
+  let stubbsData = {
     // Server field updates count as another write so fuck that
     processed_at: new Date(),
 
@@ -29,7 +25,13 @@ exports.createNewStubb = async function (admin, firestore, mentionData, safeRedd
 
     // How many parents exist until genesis
     tree_depth: parentTreeDepth + 1
-  });
+  };
+
+  if (isGenesis) {
+    delete stubbsData.inf_by;
+    stubbsData.is_genesis = true
+  }
+  batch.set(stubbsCreateRef, stubbsData);
 
   // Collection of only the names as a lower cost lookup
   let stubbsLookupCreateRef = firestore.collection('stubbs_names').doc(safeRedditorName);
@@ -44,8 +46,8 @@ exports.updateAliceDocWithNovelInfections = async function (admin, firestore, sa
 
   const numNewInfected = safeNewlyInfectedNamesList.length;
   return await aliceRef.update({
-    num_inf_direct: firestore.FieldValue.increment(numNewInfected),
-    inf_list: firestore.FieldValue.arrayUnion(safeNewlyInfectedNamesList)
+    num_inf_direct: admin.firestore.FieldValue.increment(numNewInfected),
+    inf_list: admin.firestore.FieldValue.arrayUnion(safeNewlyInfectedNamesList)
   });
 }
 
