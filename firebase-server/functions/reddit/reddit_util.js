@@ -37,14 +37,16 @@ exports.getAllMentionParcels = async function() {
   return mentionParcels;
 }
 
-exports.getAllRepliersToMention = async function(mentionId) {
+exports.getAllRepliersToMention = async function(mentionId, safeOriginalAuthorName) {
   // Get the comment itself
   let comment = await reddit.getComment(mentionId);
+
   // https://not-an-aardvark.github.io/snoowrap/Comment.html#expandReplies__anchor
   // The depth is explicitly checked since the Reddit API apparently
   // can return deeper comments than we want
   return comment.expandReplies({ depth: 1 }).replies
     .filter(post => post.depth === 1)
+    .filter(post => getFirestoreSafeRedditorName(post.author.name) !== safeOriginalAuthorName)
     .map(post => getFirestoreSafeRedditorName(post.author.name));
 }
 

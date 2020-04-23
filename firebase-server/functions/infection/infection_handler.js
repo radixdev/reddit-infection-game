@@ -1,5 +1,6 @@
 const reddit_util = require('../reddit/reddit_util.js');
 const infection_recorder = require('./records.js');
+const stubbs_manager = require('./stubbs.js');
 
 exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
   // Don't want to process an id twice in this same block
@@ -34,9 +35,12 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
 }
 
 async function handleMentionDoc(admin, firestore, mentionData) {
+  // ALICE the author has bitten BOB
+  const aliceName = mentionData.author;
+
   console.log(`Handling mention doc for data ${mentionData.context}`);
   // Get all the replices to even see if we have to do anything
-  const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id);
+  const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
 
   if (allRepliersToMention.length === 0) {
     // Nothing to do!
@@ -45,7 +49,11 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   }
 
   // Check if author is infected, if not back out
-  // TODO
+  let aliceDoc = stubbs_manager.getDocumentForRedditor(aliceName);
+  if (!aliceDoc.exists) {
+    console.log(`Author with name ${aliceName} is not infected!`);
+    return;
+  }
 
   // INFECTION RECORD COLLECTION
     // * CREATE document describing the when/where/who of the infection for each individual infection
