@@ -4,11 +4,14 @@ exports.createGenesisStubb = async function(admin, firestore, unsafeRedditorUser
   // Create a new user with no parents and a special "is genesis" key
 }
 
-exports.createNewStubb = async function(admin, firestore, mentionData, safeReplierName, parentTreeDepth) {
+exports.createNewStubb = async function (admin, firestore, mentionData, safeRedditorName, parentTreeDepth) {
+  let batch = firestore.batch();
+
   // Create a new user with links to the mentioner
-  const stubbsCollection = firestore.collection('stubbs');
-  let stubbsDocWrite = stubbsCollection.doc(safeReplierName).set({
-    processed_at: admin.firestore.FieldValue.serverTimestamp(),
+  let stubbsCreateRef = firestore.collection('stubbs').doc(safeRedditorName);
+  batch.set(stubbsRef, {
+    // Server field updates count as another write so fuck that
+    processed_at: new Date(),
 
     inf_by: mentionData.author,
     inf_at: new Date(mentionData.posted_at_utc * 1000),
@@ -27,13 +30,12 @@ exports.createNewStubb = async function(admin, firestore, mentionData, safeRepli
     tree_depth: parentTreeDepth + 1
   });
 
-  // Collection of only the names
-  const stubbsNamesCollection = firestore.collection('stubbs_names');
-  let stubbsLookupDocWrite = stubbsNamesCollection.doc(safeReplierName).set({
-    name: safeReplierName
-  });
+  // Collection of only the names as a lower cost lookup
+  let stubbsLookupCreateRef = firestore.collection('stubbs_names').doc(safeRedditorName);
+  batch.set(stubbsLookupCreateRef, { name: safeRedditorName} );
 
-  return Promise.all([stub])
+  // All done
+  return batch.commit();
 }
 
 exports.isRedditorAlreadyInfected = async function (admin, firestore, safeRedditorName) {

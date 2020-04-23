@@ -40,7 +40,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
 
   console.log(`Handling mention doc for data ${mentionData.context}`);
   // Get all the replices to even see if we have to do anything
-  const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
+  let allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
 
   if (allRepliersToMention.length === 0) {
     // Nothing to do!
@@ -54,6 +54,8 @@ async function handleMentionDoc(admin, firestore, mentionData) {
     console.log(`Author with name ${aliceName} is not infected!`);
     return;
   }
+
+  // Need to sanitize the list of repliers of people already infected
 
   // INFECTION RECORD COLLECTION
     // * CREATE document describing the when/where/who of the infection for each individual infection
