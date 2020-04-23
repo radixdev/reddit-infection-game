@@ -5,11 +5,11 @@ exports.createInfectionRecords = async function (admin, firestore, mondayUsernam
   for (let i = 0; i < mondayUsernames.length; i++) {
     let mondayUsername = mondayUsernames[i];
     let recordDoc = infectionRecordCollection.add({
-      infected_by: data.author,
-      newly_infected: mondayUsername,
-      infected_in_subreddit: data.subreddit,
-      infection_context: `https://reddit.com${data.context}`,
-      infected_at_date: new Date(data.posted_at_utc * 1000),
+      inf_by: data.author,
+      newly_inf: mondayUsername,
+      inf_sub: data.subreddit,
+      inf_context: `https://reddit.com${data.context}`,
+      inf_at: new Date(data.posted_at_utc * 1000),
 
       fs_created_at: admin.firestore.FieldValue.serverTimestamp(),
     });

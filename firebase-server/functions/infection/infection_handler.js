@@ -40,7 +40,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
 
   console.log(`Handling mention doc for data ${mentionData.context}`);
   // Get all the replices to even see if we have to do anything
-  let allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
+  const allRepliersToMention = await reddit_util.getAllRepliersToMention(mentionData.mention_id, aliceName);
 
   if (allRepliersToMention.length === 0) {
     // Nothing to do!
@@ -56,10 +56,11 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   }
 
   // Need to sanitize the list of repliers of people already infected
+  sanitizedRepliersList = await stubbs_manager.filterListOfAlreadyInfected(admin, firestore, allRepliersToMention);
 
   // INFECTION RECORD COLLECTION
     // * CREATE document describing the when/where/who of the infection for each individual infection
-  await infection_recorder.createInfectionRecords(admin, firestore, allRepliersToMention, mentionData);
+  await infection_recorder.createInfectionRecords(admin, firestore, sanitizedRepliersList, mentionData);
 
   // INFECTED COLLECTION
     // * CREATE infection document for each replier, stating when/where/who infected them

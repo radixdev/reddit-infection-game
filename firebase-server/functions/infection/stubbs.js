@@ -48,3 +48,10 @@ exports.getDocumentForRedditor = async function(admin, firestore, safeRedditorNa
   const stubbsCollection = firestore.collection('stubbs');
   return await stubbsCollection.doc(safeRedditorName).get();
 }
+
+exports.filterListOfAlreadyInfected = async function (admin, firestore, safeRedditorName) {
+  // list = [A, B, C]
+  // infected = [A, B]
+  // return [C]
+
+}
