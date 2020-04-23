@@ -43,17 +43,19 @@ exports.createNewStubb = async function (admin, firestore, mentionData, safeRedd
 
 exports.updateAliceDocWithNovelInfections = async function (admin, firestore, safeAliceName, safeNewlyInfectedNamesList) {
   let aliceRef = firestore.collection('stubbs').doc(safeAliceName);
+  console.log(`updateAliceDocWithNovelInfections safeNewlyInfectedNamesList ${safeNewlyInfectedNamesList}`);
 
   const numNewInfected = safeNewlyInfectedNamesList.length;
   return await aliceRef.update({
     num_inf_direct: admin.firestore.FieldValue.increment(numNewInfected),
-    inf_list: admin.firestore.FieldValue.arrayUnion(safeNewlyInfectedNamesList)
+    // Spread the array
+    inf_list: admin.firestore.FieldValue.arrayUnion(...safeNewlyInfectedNamesList)
   });
 }
 
 exports.isRedditorAlreadyInfected = async function (admin, firestore, safeRedditorName) {
   const stubbsLookupCollection = firestore.collection('stubbs_names');
-  let doc = await stubbsCollection.doc(safeRedditorName).get();
+  let doc = await stubbsLookupCollection.doc(safeRedditorName).get();
   return {
     name: safeRedditorName,
     is_already_infected: doc.exists
@@ -73,10 +75,10 @@ exports.filterListOfAlreadyInfected = async function (admin, firestore, safeRedd
   let infectionStatusPromises = [];
   for (let i = 0; i < safeRedditorNameList.length; i++) {
     let safeRedditorName = safeRedditorNameList[i];
-    infectionStatusPromises.push(isRedditorAlreadyInfected(admin, firestore, safeRedditorName));
+    infectionStatusPromises.push(exports.isRedditorAlreadyInfected(admin, firestore, safeRedditorName));
   }
 
-  let promiseStatuses = Promise.all(infectionStatusPromises);
+  let promiseStatuses = await Promise.all(infectionStatusPromises);
   sanitizedList = [];
   for (let i = 0; i < promiseStatuses.length; i++) {
     let promiseStatus = promiseStatuses[i];

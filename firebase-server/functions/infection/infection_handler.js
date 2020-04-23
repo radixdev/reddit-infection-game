@@ -68,14 +68,14 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   }
 
   // Check if author is infected, if not back out
-  let aliceDoc = stubbs_manager.getDocumentForRedditor(admin, firestore, aliceName);
+  let aliceDoc = await stubbs_manager.getDocumentForRedditor(admin, firestore, aliceName);
   if (!aliceDoc.exists) {
     console.log(`Author with name ${aliceName} is not infected!`);
     return Promise.resolve();
   }
 
   // Need to sanitize the list of repliers of people already infected
-  sanitizedRepliersList = await stubbs_manager.filterListOfAlreadyInfected(admin, firestore, allRepliersToMention);
+  let sanitizedRepliersList = await stubbs_manager.filterListOfAlreadyInfected(admin, firestore, allRepliersToMention);
   console.log(`sanitizedRepliersList: ${sanitizedRepliersList}`);
   if (sanitizedRepliersList.length === 0) {
     console.log(`All repliers were already infected. Returning.`);

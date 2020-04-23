@@ -26,7 +26,7 @@ exports.getAllMentionParcels = async function() {
     mentionParcels.push({
       mention_id: mention.id,
       posted_at_utc: mention.created_utc,
-      author: getFirestoreSafeRedditorName(mention.author.name),
+      author: exports.getFirestoreSafeRedditorName(mention.author.name),
       subreddit: mention.subreddit.display_name,
       context: mention.context
     });
@@ -46,8 +46,8 @@ exports.getAllRepliersToMention = async function(mentionId, safeOriginalAuthorNa
   // can return deeper comments than we want
   return comment.expandReplies({ depth: 1 }).replies
     .filter(post => post.depth === 1)
-    .filter(post => getFirestoreSafeRedditorName(post.author.name) !== safeOriginalAuthorName)
-    .map(post => getFirestoreSafeRedditorName(post.author.name));
+    .filter(post => exports.getFirestoreSafeRedditorName(post.author.name) !== safeOriginalAuthorName)
+    .map(post => exports.getFirestoreSafeRedditorName(post.author.name));
 }
 
 async function getAllMentions() {
