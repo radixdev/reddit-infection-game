@@ -15,42 +15,6 @@ const job_enqueuer = require('./tasker/job_enqueuer.js');
 const job_dequeuer = require('./tasker/job_dequeuer.js');
 const infection_handler = require('./infection/infection_handler.js');
 
-exports.helloWorld = functions.https.onRequest(async (request, response) => {
-  try {
-    // await reddit_util.test();
-    // let mentionParcels = await reddit_util.getAllMentionParcels();
-    // console.log(mentionParcels);
-
-    // let mentionParcels = await reddit_util.getAllMentionParcels();
-    // console.log(mentionParcels);
-
-    // Add each parcel to the pending queue in firestore
-    let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
-
-    let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
-    await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
-
-    // await reddit_util.setUserInfectionFlair("'call_me_miguel'", 5, 100);
-    response.send("all good");
-    return;
-  } catch (err) {
-    console.log(`Last stage caught error ${err}`);
-    console.log(err);
-    return "fuck";
-  }
-});
-
-exports.createGenesisUser = functions.https.onRequest(async (request, response) => {
-  try {
-    await infection_handler.createGenesisInfection(admin, firestore, "call_me_miguel");
-    return response.send("created gensis user... me!");
-  } catch (err) {
-    console.log(`Last stage caught error ${err}`);
-    console.log(err);
-    return "fuck";
-  }
-});
-
 exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
   try {
     let mentionParcels = await reddit_util.getAllMentionParcels();
@@ -75,3 +39,39 @@ exports.scheduledMentionDequeuer = functions.pubsub.schedule('every 20 minutes')
   }
   return null;
 });
+
+// exports.helloWorld = functions.https.onRequest(async (request, response) => {
+//   try {
+//     // await reddit_util.test();
+//     // let mentionParcels = await reddit_util.getAllMentionParcels();
+//     // console.log(mentionParcels);
+
+//     // let mentionParcels = await reddit_util.getAllMentionParcels();
+//     // console.log(mentionParcels);
+
+//     // Add each parcel to the pending queue in firestore
+//     // let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
+
+//     let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
+//     await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
+
+//     // await reddit_util.setUserInfectionFlair("'call_me_miguel'", 5, 100);
+//     response.send("all good");
+//     return;
+//   } catch (err) {
+//     console.log(`Last stage caught error ${err}`);
+//     console.log(err);
+//     return "fuck";
+//   }
+// });
+
+// exports.createGenesisUser = functions.https.onRequest(async (request, response) => {
+//   try {
+//     await infection_handler.createGenesisInfection(admin, firestore, "call_me_miguel");
+//     return response.send("created gensis user... me!");
+//   } catch (err) {
+//     console.log(`Last stage caught error ${err}`);
+//     console.log(err);
+//     return "fuck";
+//   }
+// });

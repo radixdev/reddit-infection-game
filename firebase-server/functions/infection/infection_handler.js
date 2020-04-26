@@ -27,8 +27,14 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
   // Process everything before deletions
   await Promise.all(processingPromises);
 
-  // TODO Delete the docs! Duplicate mention ids as well
-  console.log("Would have deleted here!");
+  // Delete the docs! Duplicate mention ids as well
+  const deletionPromises = [];
+  for (let i = 0; i < mentionDocs.length; i++) {
+    let doc = mentionDocs[i];
+    deletionPromises.push(doc.ref.delete());
+  }
+
+  await Promise.all(deletionPromises);
 
   // Done
   return Promise.resolve();
