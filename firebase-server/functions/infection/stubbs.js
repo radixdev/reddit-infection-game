@@ -89,3 +89,38 @@ exports.filterListOfAlreadyInfected = async function (admin, firestore, safeRedd
 
   return sanitizedList;
 }
+
+/**
+ * Traverses up the infection chain to update the
+ * indirect infection counter and set flairs along the way.
+ *
+ * Will perform a Firestore get for every user along the way,
+ * including the first user in this list.
+ */
+exports.traverseParentChainToUpdateIndirectCounts = async function (admin, firestore, safeRedditorName, incrementAmt) {
+  let safeCurrentUser = safeRedditorName;
+
+  /* eslint-disable no-await-in-loop */
+  while (safeCurrentUser !== undefined && safeCurrentUser.length >= 0) {
+    console.log(`On traversal for user ${safeCurrentUser}`);
+
+    let userDoc = await exports.getDocumentForRedditor(admin, firestore, safeCurrentUser);
+    if (!userDoc.exists) {
+      break;
+    }
+    const data = userDoc.data();
+
+    // Set the flair
+    let directCount = data.num_inf_direct;
+    let indirectCount = data.num_inf_indirect + incrementAmt;
+
+    // Update their infection count atomically
+    await userDoc.update({
+      num_inf_indirect: admin.firestore.FieldValue.increment(incrementAmt)
+    });
+
+    // Get the next user in the chain
+    safeCurrentUser = data.inf_by;
+  }
+  /* eslint-enable no-await-in-loop */
+}

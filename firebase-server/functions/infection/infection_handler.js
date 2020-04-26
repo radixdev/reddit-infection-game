@@ -73,6 +73,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
     console.log(`Author with name ${aliceName} is not infected!`);
     return Promise.resolve();
   }
+  const aliceData = aliceDoc.data();
 
   // Need to sanitize the list of repliers of people already infected
   let sanitizedRepliersList = await stubbs_manager.filterListOfAlreadyInfected(admin, firestore, allRepliersToMention);
@@ -93,7 +94,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
     // * Iterate up infector parents with the number of newly infected
 
   // Create the infection doc for each replier
-  const aliceDepth = aliceDoc.tree_depth || 0;
+  const aliceDepth = aliceData.tree_depth || 0;
   let stubbCreationPromises = [];
   sanitizedRepliersList.forEach(replier => {
     stubbCreationPromises.push(stubbs_manager.createNewStubb(admin, firestore, mentionData, replier, aliceDepth, false));
@@ -103,8 +104,16 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   // Update alice doc
   await stubbs_manager.updateAliceDocWithNovelInfections(admin, firestore, aliceName, sanitizedRepliersList);
 
-  // TODO
+  // Set alice flair
+  // Should be unchanged
+  let aliceIndirectCount = aliceData.num_inf_direct;
+  // Since this data is stale, this should be the new number
+  let aliceDirectCount = aliceData + sanitizedRepliersList.length;
+  await reddit_util.setUserInfectionFlair(aliceName, aliceDirectCount, aliceIndirectCount);
+
   // Update infector parents up the chain!
+  let aliceInfectionParent = aliceData.inf_by;
+  await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceName, sanitizedRepliersList.length);
 
   return Promise.resolve();
 }

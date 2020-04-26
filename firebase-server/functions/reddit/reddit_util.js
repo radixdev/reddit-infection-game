@@ -50,6 +50,26 @@ exports.getAllRepliersToMention = async function(mentionId, safeOriginalAuthorNa
     .map(post => exports.getFirestoreSafeRedditorName(post.author.name));
 }
 
+exports.setUserInfectionFlair = async function (safeFirestoreName, directInfections, indirectInfections) {
+  let flairText = `D₀: ${directInfections} Iₙ: ${indirectInfections}`;
+  return setUserFlair(safeFirestoreName, flairText);
+}
+
+// Just the name in quotes
+exports.getFirestoreSafeRedditorName = function(name) {
+  return `'${name}'`;
+}
+
+exports.getRedditorNameFromFirestore = function(safeFirestoreName) {
+  return safeFirestoreName.slice(1, safeFirestoreName.length - 1);
+}
+
+async function setUserFlair(safeFirestoreName, flairText) {
+  const redditorName = exports.getRedditorNameFromFirestore(safeFirestoreName);
+  console.log(`Giving user ${redditorName} flair ${flairText}`);
+  return await reddit.getUser(redditorName).assignFlair({ subredditName: 'RedditInfectionGame', text: flairText });
+}
+
 async function getAllMentions() {
   // The following doesn't work since they aren't
   // actual inbox messages and can't be marked-as-read/deleted
@@ -58,9 +78,4 @@ async function getAllMentions() {
   // Check if it's a mention based on the fields present
   return (await reddit.getUnreadMessages())
     .filter(p => p.was_comment === true && p.type === "username_mention");
-}
-
-// Just the name in quotes
-exports.getFirestoreSafeRedditorName = function(name) {
-  return `'${name}'`;
 }
