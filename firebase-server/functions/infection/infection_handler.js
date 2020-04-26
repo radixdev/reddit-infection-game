@@ -14,7 +14,7 @@ exports.handleNewMentionJobs = async function (admin, firestore, mentionDocs) {
     // Only process the uniques
     let mentionId = data.mention_id;
     if (seenMentionIds.has(mentionId)) {
-      console.log(`Already seen mention id ${mentionId}`);
+      // console.log(`Already seen mention id ${mentionId}`);
       continue;
     }
     seenMentionIds.add(mentionId);

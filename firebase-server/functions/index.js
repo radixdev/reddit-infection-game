@@ -24,14 +24,13 @@ exports.helloWorld = functions.https.onRequest(async (request, response) => {
     // let mentionParcels = await reddit_util.getAllMentionParcels();
     // console.log(mentionParcels);
 
-    // // Add each parcel to the pending queue in firestore
-    // let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
+    // Add each parcel to the pending queue in firestore
+    let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
 
     let dequeuedJobDocuments = await job_dequeuer.dequeueExpiredMentionsFromPending(admin, firestore);
-    // dequeuedJobDocuments.forEach(doc => {
-    //   console.log(doc.data());
-    // });
     await infection_handler.handleNewMentionJobs(admin, firestore, dequeuedJobDocuments);
+
+    // await reddit_util.setUserInfectionFlair("'call_me_miguel'", 5, 100);
     response.send("all good");
     return;
   } catch (err) {

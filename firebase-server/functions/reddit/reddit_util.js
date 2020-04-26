@@ -51,8 +51,8 @@ exports.getAllRepliersToMention = async function(mentionId, safeOriginalAuthorNa
 }
 
 exports.setUserInfectionFlair = async function (safeFirestoreName, directInfections, indirectInfections) {
-  let flairText = `D₀: ${directInfections} Iₙ: ${indirectInfections}`;
-  return setUserFlair(safeFirestoreName, flairText);
+  let flairText = `ᕕ( ᐛ )ᕗ: ${directInfections}          ᕦ(ò_óˇ)ᕤ: ${indirectInfections}`;
+  return await setUserFlair(safeFirestoreName, flairText);
 }
 
 // Just the name in quotes
