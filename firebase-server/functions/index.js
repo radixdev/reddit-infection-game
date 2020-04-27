@@ -40,19 +40,19 @@ exports.scheduledMentionDequeuer = functions.pubsub.schedule('every 20 minutes')
   return null;
 });
 
-const stubbs_manager = require('./stubbs.js');
-exports.helloWorld = functions.https.onRequest(async (request, response) => {
-  try {
-    let aliceInfectionParent = "'call_me_miguel'";
-    await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceInfectionParent, 1);
-    response.send("all good");
-    return;
-  } catch (err) {
-    console.log(`Last stage caught error ${err}`);
-    console.log(err);
-    return "fuck";
-  }
-});
+// const stubbs_manager = require('./stubbs.js');
+// exports.helloWorld = functions.https.onRequest(async (request, response) => {
+//   try {
+//     let aliceInfectionParent = "'call_me_miguel'";
+//     await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceInfectionParent, 1);
+//     response.send("all good");
+//     return;
+//   } catch (err) {
+//     console.log(`Last stage caught error ${err}`);
+//     console.log(err);
+//     return "fuck";
+//   }
+// });
 
 // exports.createGenesisUser = functions.https.onRequest(async (request, response) => {
 //   try {

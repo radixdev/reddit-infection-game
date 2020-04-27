@@ -37,6 +37,9 @@ exports.createNewStubb = async function (admin, firestore, mentionData, safeRedd
   let stubbsLookupCreateRef = firestore.collection('stubbs_names').doc(safeRedditorName);
   batch.set(stubbsLookupCreateRef, { name: safeRedditorName} );
 
+  // Set an "initial user" flair
+  await reddit_util.setUserInfectionFlair(safeRedditorName, 0, 0);
+
   // All done
   return batch.commit();
 }
