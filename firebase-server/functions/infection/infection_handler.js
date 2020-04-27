@@ -112,7 +112,7 @@ async function handleMentionDoc(admin, firestore, mentionData) {
 
   // Set alice flair
   // Should be unchanged
-  let aliceIndirectCount = aliceData.num_inf_direct;
+  let aliceIndirectCount = aliceData.num_inf_indirect;
   // Since this data is stale, this should be the new number
   let aliceDirectCount = aliceData.num_inf_direct + sanitizedRepliersList.length;
   await reddit_util.setUserInfectionFlair(aliceName, aliceDirectCount, aliceIndirectCount);
