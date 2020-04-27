@@ -108,14 +108,16 @@ exports.traverseParentChainToUpdateIndirectCounts = async function (admin, fires
     if (!userDoc.exists) {
       break;
     }
+    console.log(`Got document on traversal: ${userDoc}`);
     const data = userDoc.data();
 
     // Set the flair
     let directCount = data.num_inf_direct;
     let indirectCount = data.num_inf_indirect + incrementAmt;
+    await reddit_util.setUserInfectionFlair(reddit_util.getRedditorNameFromFirestore(safeCurrentUser), directCount, indirectCount);
 
     // Update their infection count atomically
-    await userDoc.update({
+    await userDoc.ref.update({
       num_inf_indirect: admin.firestore.FieldValue.increment(incrementAmt)
     });
 

@@ -114,12 +114,12 @@ async function handleMentionDoc(admin, firestore, mentionData) {
   // Should be unchanged
   let aliceIndirectCount = aliceData.num_inf_direct;
   // Since this data is stale, this should be the new number
-  let aliceDirectCount = aliceData + sanitizedRepliersList.length;
+  let aliceDirectCount = aliceData.num_inf_direct + sanitizedRepliersList.length;
   await reddit_util.setUserInfectionFlair(aliceName, aliceDirectCount, aliceIndirectCount);
 
   // Update infector parents up the chain!
   let aliceInfectionParent = aliceData.inf_by;
-  await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceName, sanitizedRepliersList.length);
+  await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceInfectionParent, sanitizedRepliersList.length);
 
   return Promise.resolve();
 }
