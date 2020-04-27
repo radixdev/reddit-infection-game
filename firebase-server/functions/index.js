@@ -15,7 +15,7 @@ const job_enqueuer = require('./tasker/job_enqueuer.js');
 const job_dequeuer = require('./tasker/job_dequeuer.js');
 const infection_handler = require('./infection/infection_handler.js');
 
-exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 10 minutes').onRun(async (context) => {
   try {
     let mentionParcels = await reddit_util.getAllMentionParcels();
     console.log(mentionParcels);
