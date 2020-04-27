@@ -22,8 +22,6 @@ exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 5 minutes').
 
     // Add each parcel to the pending queue in firestore
     let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
-    console.log(enqueueResponses);
-    console.log("Enqueued mentions!");
   } catch (err) {
     console.error(err);
   }

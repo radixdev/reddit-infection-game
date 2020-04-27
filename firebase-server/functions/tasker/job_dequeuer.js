@@ -9,7 +9,7 @@ exports.dequeueExpiredMentionsFromPending = async function (admin, firestore) {
     .get();
 
   if (expiredDocumentsSnapshot.empty) {
-    console.log("No documents have expired. Returning empty list.");
+    // console.log("No documents have expired. Returning empty list.");
     return [];
   }
 
