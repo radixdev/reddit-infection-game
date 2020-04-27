@@ -18,7 +18,9 @@ const infection_handler = require('./infection/infection_handler.js');
 exports.scheduledMentionEnqueuer = functions.pubsub.schedule('every 10 minutes').onRun(async (context) => {
   try {
     let mentionParcels = await reddit_util.getAllMentionParcels();
-    console.log(mentionParcels);
+    if (mentionParcels.length > 0) {
+      console.log(mentionParcels);
+    }
 
     // Add each parcel to the pending queue in firestore
     let enqueueResponses = await job_enqueuer.enqueueMentionsToPendingList(admin, firestore, mentionParcels);
