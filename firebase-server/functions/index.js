@@ -40,11 +40,10 @@ exports.scheduledMentionDequeuer = functions.pubsub.schedule('every 20 minutes')
   return null;
 });
 
-// const stubbs_manager = require('./stubbs.js');
 // exports.helloWorld = functions.https.onRequest(async (request, response) => {
 //   try {
-//     let aliceInfectionParent = "'call_me_miguel'";
-//     await stubbs_manager.traverseParentChainToUpdateIndirectCounts(admin, firestore, aliceInfectionParent, 1);
+//     let aliceInfectionParent = "'Clobro123'";
+//     await reddit_util.setUserInfectionFlair(aliceInfectionParent, 0, 0);
 //     response.send("all good");
 //     return;
 //   } catch (err) {
